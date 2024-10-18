@@ -237,7 +237,7 @@
       <option value="3">3</option>
     </select>
 
-    <label style="margin-bottom: 10px;">Выберите тasdоппинги:</label>
+    <label style="margin-bottom: 10px;">Выберите топпинги:</label>
     <div class="toppings-grid">
       <div class="topping" id="chocolate-topping">
         <input type="checkbox" value="шоколадом" id="chocolate" />
