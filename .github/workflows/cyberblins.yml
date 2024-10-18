@@ -250,7 +250,7 @@
 <body>
 
   <div class="container">
-    <h1>Заказ блинов</h1>
+    <h1>CYBER BLINS</h1>
 
     <label for="customer">Имя:</label>
     <input type="text" id="customer" placeholder="Введите ваше имя" />
