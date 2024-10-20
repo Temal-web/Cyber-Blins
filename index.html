@@ -27,7 +27,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
       padding: 20px;
     }
 
@@ -116,7 +116,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-top: 20px;
     }
 
     .quantity-control {
@@ -161,7 +161,7 @@
 
     .cart-button {
       position: fixed;
-      top: 20px;
+      bottom: 20px;
       right: 20px;
       padding: 10px 15px;
       background-color: #007bff;
@@ -186,8 +186,7 @@
       position: fixed;
       top: 50px;
       right: 20px;
-      width: 90%;
-      max-width: 400px;
+      width: 300px;
       background-color: white;
       padding: 20px;
       border-radius: 8px;
@@ -221,29 +220,6 @@
     .remove-btn:hover {
       background-color: #c82333;
     }
-
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 2rem;
-      }
-
-      .container {
-        padding: 15px;
-      }
-
-      .topping img {
-        width: 40px;
-        height: 40px;
-      }
-
-      .quantity-control button {
-        padding: 5px 8px;
-      }
-
-      .quantity-control span {
-        font-size: 1.3rem;
-      }
-    }
   </style>
 </head>
 
@@ -253,7 +229,7 @@
     <h1>Заказ блинов</h1>
 
     <label for="customer">Имя:</label>
-    <input type="text" id="customer" placeholder="Введите ваsasafasffassf имя" />
+    <input type="text" id="customer" placeholder="Введите ваше имя" />
 
     <label for="table">Выберите стол:</label>
     <select id="table">
@@ -288,34 +264,80 @@
 
   <!-- Кнопка корзины -->
   <button class="cart-button" id="cart-button">
-    <i class="fas fa-shopping-cart"></i> Корзина
+    <i class="fas fa-shopping-cart"></i> Корзина (<span id="cart-count">0</span>)
   </button>
 
   <!-- Модальное окно корзины -->
   <div class="cart-modal" id="cart-modal">
-    <h3>Ваша корзина:</h3>
-    <div class="cart-items"></div>
-    <button class="remove-btn">Очистить корзину</button>
+    <h3>Корзина</h3>
+    <div id="cart-items"></div>
+    <button class="submit-btn" id="order-btn">Оформить заказ</button>
   </div>
 
-  <!-- Скрипты -->
   <script>
-    // Корзина
-    const cartButton = document.getElementById('cart-button');
-    const cartModal = document.getElementById('cart-modal');
-    cartButton.addEventListener('click', () => {
-      cartModal.style.display = cartModal.style.display === 'block' ? 'none' : 'block';
+    let quantity = 1;
+    let cart = [];
+
+    document.getElementById('plus-btn').addEventListener('click', () => {
+      quantity++;
+      document.getElementById('quantity').textContent = quantity;
     });
 
-    // Обработка выбора топпингов
-    document.querySelectorAll('.topping').forEach(topping => {
+    document.getElementById('minus-btn').addEventListener('click', () => {
+      if (quantity > 1) {
+        quantity--;
+        document.getElementById('quantity').textContent = quantity;
+      }
+    });
+
+    const toppingsGrid = document.querySelectorAll('.topping');
+
+    toppingsGrid.forEach(topping => {
+      topping.addEventListener('touchstart', (e) => e.preventDefault());
       topping.addEventListener('click', () => {
         const checkbox = topping.querySelector('input[type="checkbox"]');
         checkbox.checked = !checkbox.checked;
         topping.classList.toggle('selected');
       });
     });
+
+    document.getElementById('add-to-cart-btn').addEventListener('click', () => {
+      const selectedToppings = Array.from(document.querySelectorAll('.topping input[type="checkbox"]:checked')).map(
+        topping => topping.value
+      );
+      const pancakeDescription = `Блин с ${selectedToppings.length > 0 ? selectedToppings.join(', ') : 'ничем'}`;
+      const item = { description: pancakeDescription, quantity: quantity };
+      cart.push(item);
+      updateCart();
+    });
+
+    document.getElementById('cart-button').addEventListener('touchstart', (e) => e.preventDefault());
+    document.getElementById('cart-button').addEventListener('click', () => {
+      document.getElementById('cart-modal').style.display =
+        document.getElementById('cart-modal').style.display === 'none' ? 'block' : 'none';
+    });
+
+    function updateCart() {
+      const cartItemsContainer = document.getElementById('cart-items');
+      cartItemsContainer.innerHTML = '';
+      cart.forEach((item, index) => {
+        const cartItem = document.createElement('div');
+        cartItem.classList.add('cart-item');
+        cartItem.innerHTML = `<span>${item.quantity}x ${item.description}</span> <button class="remove-btn" data-index="${index}">Удалить</button>`;
+        cartItemsContainer.appendChild(cartItem);
+      });
+      document.getElementById('cart-count').textContent = cart.length;
+    }
+
+    document.getElementById('cart-items').addEventListener('click', (event) => {
+      if (event.target.classList.contains('remove-btn')) {
+        const index = event.target.getAttribute('data-index');
+        cart.splice(index, 1);
+        updateCart();
+      }
+    });
   </script>
+
 </body>
 
 </html>
