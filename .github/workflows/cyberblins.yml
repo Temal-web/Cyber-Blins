@@ -27,13 +27,14 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
+      padding: 20px;
     }
 
     h1 {
       text-align: center;
       margin-bottom: 20px;
-      font-size: 3rem;
+      font-size: 2.5rem;
       color: #333;
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
     }
@@ -115,7 +116,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-top: 20px;
     }
 
     .quantity-control {
@@ -160,7 +161,7 @@
 
     .cart-button {
       position: fixed;
-      top: 20px;
+      bottom: 20px;
       right: 20px;
       padding: 10px 15px;
       background-color: #007bff;
@@ -292,6 +293,7 @@
     const toppingsGrid = document.querySelectorAll('.topping');
 
     toppingsGrid.forEach(topping => {
+      topping.addEventListener('touchstart', (e) => e.preventDefault());
       topping.addEventListener('click', () => {
         const checkbox = topping.querySelector('input[type="checkbox"]');
         checkbox.checked = !checkbox.checked;
@@ -300,63 +302,38 @@
     });
 
     document.getElementById('add-to-cart-btn').addEventListener('click', () => {
-      const customer = document.getElementById('customer').value;
-      const table = document.getElementById('table').value;
-
-      let selectedToppings = [];
-      document.querySelectorAll('.toppings-grid input:checked').forEach(topping => {
-        selectedToppings.push(topping.value);
-      });
-
-      const order = {
-        customer,
-        table,
-        toppings: selectedToppings,
-        quantity
-      };
-
-      cart.push(order);
+      const selectedToppings = Array.from(document.querySelectorAll('.topping input[type="checkbox"]:checked')).map(
+        topping => topping.value
+      );
+      const pancakeDescription = `Блин с ${selectedToppings.length > 0 ? selectedToppings.join(', ') : 'ничем'}`;
+      const item = { description: pancakeDescription, quantity: quantity };
+      cart.push(item);
       updateCart();
     });
 
-    function updateCart() {
-      const cartItems = document.getElementById('cart-items');
-      cartItems.innerHTML = '';
+    document.getElementById('cart-button').addEventListener('touchstart', (e) => e.preventDefault());
+    document.getElementById('cart-button').addEventListener('click', () => {
+      document.getElementById('cart-modal').style.display =
+        document.getElementById('cart-modal').style.display === 'none' ? 'block' : 'none';
+    });
 
+    function updateCart() {
+      const cartItemsContainer = document.getElementById('cart-items');
+      cartItemsContainer.innerHTML = '';
       cart.forEach((item, index) => {
         const cartItem = document.createElement('div');
         cartItem.classList.add('cart-item');
-        cartItem.innerHTML = `
-          <span>${item.quantity}x Блин с ${item.toppings.join(', ')} (Стол ${item.table})</span>
-          <button class="remove-btn" data-index="${index}">Удалить</button>
-        `;
-        cartItems.appendChild(cartItem);
+        cartItem.innerHTML = `<span>${item.quantity}x ${item.description}</span> <button class="remove-btn" data-index="${index}">Удалить</button>`;
+        cartItemsContainer.appendChild(cartItem);
       });
-
       document.getElementById('cart-count').textContent = cart.length;
-
-      document.querySelectorAll('.remove-btn').forEach(button => {
-        button.addEventListener('click', (e) => {
-          const index = e.target.dataset.index;
-          cart.splice(index, 1);
-          updateCart();
-        });
-      });
     }
 
-    document.getElementById('cart-button').addEventListener('click', () => {
-      const cartModal = document.getElementById('cart-modal');
-      cartModal.style.display = cartModal.style.display === 'none' ? 'block' : 'none';
-    });
-
-    document.getElementById('order-btn').addEventListener('click', () => {
-      if (cart.length > 0) {
-        alert('Заказ оформлен!');
-        cart = [];
+    document.getElementById('cart-items').addEventListener('click', (event) => {
+      if (event.target.classList.contains('remove-btn')) {
+        const index = event.target.getAttribute('data-index');
+        cart.splice(index, 1);
         updateCart();
-        document.getElementById('cart-modal').style.display = 'none';
-      } else {
-        alert('Корзина пуста!');
       }
     });
   </script>
